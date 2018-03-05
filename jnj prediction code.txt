@@ -1,0 +1,66 @@
+#directories
+setwd("C:/Users/Documents/jnj")
+mydata <- read.csv("C:/Users/Documents/jnj/jnj-1")
+attach(mydata)
+
+#load libraries
+
+library(MASS)
+library(tseries)
+library(forecast)
+
+#plot and convert to ln format
+
+lnstock= log(price[1:96])
+lnstock
+
+#ACF,PACF and Dickey fuller test
+acf(lnstock, lag.max=20)
+pacf(lnstock, lag.max=20)
+difflnstock=diff(lnstock,1)
+adf.test(lnstock)
+adf.test(difflnstock)
+
+#Timeseries and AUTO.ARIMA
+
+pricearima <- ts(lnstock, start=c(2006,09),frequency=12)
+fitlnstock <- auto.arima (pricearima)
+fitlnstock
+plot(pricearima,type='l')
+title('JNJ Price')
+exp(lnstock)
+
+#Forecasted values from ARIMA
+forecastedvalues_ln= forecast(fitlnstock,h=26)
+forecastedvalues_ln
+plot(forecastedvalues_ln)
+forecastedvaluesextracted= as.numeric(forecastedvalues_ln$mean)
+finalforecastvalues= exp(forecastedvaluesextracted)
+
+#Percentage error
+df <- data.frame(price[96:121],finalforecastvalues)
+col_headings <- c("Actual Price","Forecasted Price")
+names(df) <- col_headings
+attach(df)
+percentage_error= ((df$'Actual Price'-df$'Forecasted Price')/(df$'Actual Price'))
+percentage_error
+mean(percentage_error)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
